@@ -16,7 +16,8 @@ A simple Node.js Express application designed as an example for Backstage integr
 
 ### Base Endpoints
 - `GET /` - Welcome message and API documentation
-- `GET /health` - Health check with system information
+- `GET /health` - Health check with system and Git information
+- `GET /api-status` - Comprehensive API status with GitHub integration
 - `GET /api` - API information
 
 ### User Endpoints
@@ -87,14 +88,42 @@ docker-compose up
 
 - `PORT` - Server port (default: 3000)
 - `NODE_ENV` - Environment mode (development/production)
+- `GITHUB_TOKEN` - GitHub API token for repository information (optional)
+- `GITHUB_OWNER` - GitHub repository owner (default: fnaraujo)
+- `GITHUB_REPO` - GitHub repository name (default: backstage-node-app)
+
+### GitHub Integration Setup
+
+1. Create a GitHub Personal Access Token:
+   - Go to https://github.com/settings/tokens
+   - Generate a new token with `repo` scope
+   - Copy the token
+
+2. Set environment variables:
+```bash
+export GITHUB_TOKEN=your_token_here
+export GITHUB_OWNER=your_username
+export GITHUB_REPO=your_repo_name
+```
+
+Or create a `.env` file (copy from `env.example`):
+```bash
+cp env.example .env
+# Edit .env with your values
+```
 
 ## Backstage Integration
 
 This application is designed to be easily integrated with Backstage. The API endpoints provide:
 
 1. **Service Discovery**: The `/api/services` endpoint can be used by Backstage to discover and catalog services
-2. **Health Monitoring**: The `/health` endpoint provides health status for monitoring
-3. **Metadata**: Service endpoints include version, deployment status, and metrics information
+2. **Health Monitoring**: The `/health` endpoint provides health status with Git information
+3. **Comprehensive Status**: The `/api-status` endpoint provides detailed service information including:
+   - System metrics (memory, CPU, uptime)
+   - Git information (branch, last commit, author)
+   - GitHub repository data (stars, forks, issues, workflows)
+   - Service metadata and endpoints
+4. **Metadata**: Service endpoints include version, deployment status, and metrics information
 
 ### Example Backstage Integration
 

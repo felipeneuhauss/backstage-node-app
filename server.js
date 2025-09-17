@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const githubService = require('./services/githubService');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,6 +20,7 @@ app.get('/', (req, res) => {
     timestamp: new Date().toISOString(),
     endpoints: {
       health: '/health',
+      apiStatus: '/api-status',
       api: '/api',
       users: '/api/users',
       services: '/api/services'
@@ -26,14 +28,33 @@ app.get('/', (req, res) => {
   });
 });
 
-app.get('/health', (req, res) => {
-  res.json({
-    status: 'healthy',
-    uptime: process.uptime(),
-    timestamp: new Date().toISOString(),
-    memory: process.memoryUsage(),
-    version: process.version
-  });
+app.get('/health', async (req, res) => {
+  try {
+    const gitInfo = await githubService.getAllInfo();
+    
+    res.json({
+      status: 'healthy',
+      uptime: process.uptime(),
+      timestamp: new Date().toISOString(),
+      memory: process.memoryUsage(),
+      version: process.version,
+      environment: process.env.NODE_ENV || 'development',
+      git: gitInfo.local,
+      github: gitInfo.github ? {
+        repo: gitInfo.github.repo.name,
+        branch: gitInfo.github.repo.defaultBranch,
+        lastCommit: gitInfo.github.latestCommit?.hash,
+        lastUpdate: gitInfo.github.repo.updatedAt
+      } : null
+    });
+  } catch (error) {
+    console.error('Health check error:', error);
+    res.status(500).json({
+      status: 'unhealthy',
+      error: 'Failed to get health information',
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 app.get('/api', (req, res) => {
@@ -42,6 +63,56 @@ app.get('/api', (req, res) => {
     version: '1.0.0',
     documentation: 'https://github.com/backstage/backstage'
   });
+});
+
+app.get('/api-status', async (req, res) => {
+  try {
+    const gitInfo = await githubService.getAllInfo();
+    const startTime = Date.now();
+    
+    const status = {
+      service: {
+        name: 'backstage-node-app',
+        version: '1.0.0',
+        status: 'running',
+        uptime: process.uptime(),
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV || 'development',
+        port: PORT
+      },
+      system: {
+        nodeVersion: process.version,
+        platform: process.platform,
+        arch: process.arch,
+        memory: process.memoryUsage(),
+        cpuUsage: process.cpuUsage()
+      },
+      git: {
+        local: gitInfo.local,
+        github: gitInfo.github
+      },
+      workflows: gitInfo.workflows,
+      endpoints: {
+        health: '/health',
+        apiStatus: '/api-status',
+        users: '/api/users',
+        services: '/api/services'
+      },
+      responseTime: Date.now() - startTime
+    };
+
+    res.json(status);
+  } catch (error) {
+    console.error('API status error:', error);
+    res.status(500).json({
+      service: {
+        name: 'backstage-node-app',
+        status: 'error',
+        timestamp: new Date().toISOString()
+      },
+      error: 'Failed to get API status information'
+    });
+  }
 });
 
 app.get('/api/users', (req, res) => {

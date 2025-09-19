@@ -18,6 +18,10 @@ app.get('/', (req, res) => {
     message: 'Welcome to Backstage Node App',
     version: '1.0.0',
     timestamp: new Date().toISOString(),
+    hostname: process.env.HOSTNAME || require('os').hostname(),
+    podName: process.env.HOSTNAME || 'local',
+    nodeName: process.env.NODE_NAME || 'local',
+    namespace: process.env.NAMESPACE || 'default',
     endpoints: {
       health: '/health',
       apiStatus: '/api-status',
@@ -79,6 +83,13 @@ app.get('/api-status', async (req, res) => {
         timestamp: new Date().toISOString(),
         environment: process.env.NODE_ENV || 'development',
         port: PORT
+      },
+      pod: {
+        hostname: process.env.HOSTNAME || require('os').hostname(),
+        podName: process.env.HOSTNAME || 'local',
+        nodeName: process.env.NODE_NAME || 'local',
+        namespace: process.env.NAMESPACE || 'default',
+        podIP: process.env.POD_IP || '127.0.0.1'
       },
       system: {
         nodeVersion: process.version,

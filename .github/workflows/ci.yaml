@@ -40,10 +40,12 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Set short SHA
+        run: echo "SHORT_SHA=${GITHUB_SHA:0:7}" >> $GITHUB_ENV
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
           push: true
           context: .
           file: Dockerfile
-          tags: ${{ secrets.DOCKER_USERNAME }}/node-app:${{ github.sha::6 }}
+          tags: ${{ secrets.DOCKER_USERNAME }}/node-app:${{ env.SHORT_SHA }}

@@ -554,7 +554,7 @@ kubectl port-forward svc/argocd-server -n argocd-backstage 8080:443 &
 # Senha: [senha obtida no passo anterior]
 ```
 
-#### **3. Instalar ArgoCD CLI (opcional):**
+#### **3. Instalar ArgoCD CLI:**
 ```bash
 # macOS
 brew install argocd
@@ -566,7 +566,7 @@ argocd login localhost:8080 \
   --insecure
 ```
 
-### 🌐 **Configuração do Ingress (Opcional)**
+### 🌐 **Configuração do Ingress**
 
 #### **1. Adicionar domínio no hosts:**
 ```bash
@@ -578,6 +578,7 @@ sudo nano /etc/hosts
 ```
 
 #### **2. Port-forward do nginx ingress:**
+
 ```bash
 # Fazer port-forward do ingress controller
 kubectl port-forward svc/ingress-nginx-controller \
@@ -590,6 +591,7 @@ kubectl port-forward svc/ingress-nginx-controller \
 ### 📋 **Comandos Úteis do ArgoCD**
 
 #### **Via CLI:**
+
 ```bash
 # Listar aplicações
 argocd app list

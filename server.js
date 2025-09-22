@@ -34,7 +34,7 @@ app.get('/', (req, res) => {
 
 app.get('/health', async (req, res) => {
   try {
-    const gitInfo = await githubService.getAllInfo();
+    const localGitInfo = await githubService.getLocalGitInfo();
     
     res.json({
       status: 'healthy',
@@ -43,13 +43,7 @@ app.get('/health', async (req, res) => {
       memory: process.memoryUsage(),
       version: process.version,
       environment: process.env.NODE_ENV || 'development',
-      git: gitInfo.local,
-      github: gitInfo.github ? {
-        repo: gitInfo.github.repo.name,
-        branch: gitInfo.github.repo.defaultBranch,
-        lastCommit: gitInfo.github.latestCommit?.hash,
-        lastUpdate: gitInfo.github.repo.updatedAt
-      } : null
+      git: localGitInfo
     });
   } catch (error) {
     console.error('Health check error:', error);
@@ -71,7 +65,7 @@ app.get('/api', (req, res) => {
 
 app.get('/api-status', async (req, res) => {
   try {
-    const gitInfo = await githubService.getAllInfo();
+    const localGitInfo = await githubService.getLocalGitInfo();
     const startTime = Date.now();
     
     const status = {
@@ -82,7 +76,7 @@ app.get('/api-status', async (req, res) => {
         uptime: process.uptime(),
         timestamp: new Date().toISOString(),
         environment: process.env.NODE_ENV || 'development',
-        port: PORT
+        port: parseInt(PORT)
       },
       pod: {
         hostname: process.env.HOSTNAME || require('os').hostname(),
@@ -99,10 +93,8 @@ app.get('/api-status', async (req, res) => {
         cpuUsage: process.cpuUsage()
       },
       git: {
-        local: gitInfo.local,
-        github: gitInfo.github
+        local: localGitInfo
       },
-      workflows: gitInfo.workflows,
       endpoints: {
         health: '/health',
         apiStatus: '/api-status',
@@ -205,7 +197,7 @@ app.post('/api/services', (req, res) => {
   }
   
   const newService = {
-    id: name.toLowerCase().replace(/\s+/g, '-'),
+    id: name.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-'),
     name,
     version,
     status: 'deploying',
@@ -224,6 +216,12 @@ app.use('*', (req, res) => {
 });
 
 app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    return res.status(400).json({
+      error: 'Invalid JSON format'
+    });
+  }
+  
   console.error(err.stack);
   res.status(500).json({
     error: 'Something went wrong!',

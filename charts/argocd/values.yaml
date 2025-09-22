@@ -14,7 +14,7 @@ applicationset:
   replicas: 1
   
 global::
-  domain: backstage-node-app-argocd.io
+  domain: backstage-argocd.io
 
 certificates:
   enabled: true
@@ -22,6 +22,7 @@ certificates:
 server:
   ingress:
     enabled: true
+    port: 80
     className: nginx
     annotations: 
       nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"

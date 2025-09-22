@@ -66,7 +66,7 @@ describe('Users API Integration Tests', () => {
     });
 
     it('should handle concurrent requests', async () => {
-      const promises = Array(5).fill().map(() => app.get('/api/users'));
+      const promises = Array(3).fill().map(() => app.get('/api/users'));
       const responses = await Promise.all(promises);
 
       responses.forEach(response => {

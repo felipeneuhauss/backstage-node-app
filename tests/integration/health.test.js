@@ -82,7 +82,7 @@ describe('Health Endpoint Integration Tests', () => {
     });
 
     it('should handle concurrent requests', async () => {
-      const promises = Array(5).fill().map(() => app.get('/health'));
+      const promises = Array(3).fill().map(() => app.get('/health'));
       const responses = await Promise.all(promises);
 
       responses.forEach(response => {

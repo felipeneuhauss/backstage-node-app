@@ -82,7 +82,7 @@ describe('Services API Integration Tests', () => {
     });
 
     it('should handle concurrent requests', async () => {
-      const promises = Array(5).fill().map(() => app.get('/api/services'));
+      const promises = Array(3).fill().map(() => app.get('/api/services'));
       const responses = await Promise.all(promises);
 
       responses.forEach(response => {

@@ -64,7 +64,7 @@ jobs:
           sed -i "s/tag: \".*\"/tag: \"${{ needs.ci.outputs.short_commit_sha }}\"/" charts/backstage-node-app/values.yaml
           
       - name: Commit and push changes
-        uses: EndBug/add-and-commit@v10
+        uses: EndBug/add-and-commit@v9
         with:
           message: "Update image tag to ${{ needs.ci.outputs.short_commit_sha }}"
           add: "charts/backstage-node-app/values.yaml"

@@ -1,0 +1,11 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: backstage-node-app
+  description: An example of a Backstage Node.js application.
+  annotations:
+    github.com/project-slug: felipeneuhauss/backstage-node-app
+spec:
+  type: service
+  owner: development
+  lifecycle: experimental

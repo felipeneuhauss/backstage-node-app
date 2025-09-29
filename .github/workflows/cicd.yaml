@@ -59,65 +59,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         
-      - name: Modify version argo values.yaml
-        shell: bash
+      - name: Update image tag
         run: |
-          # Use a more robust approach that works on both Linux and macOS
-          sed -i.bak "s/tag: \".*\"/tag: \"${{ needs.ci.outputs.short_commit_sha }}\"/" charts/backstage-node-app/values.yaml
-          rm -f charts/backstage-node-app/values.yaml.bak
+          sed -i "s/tag: \".*\"/tag: \"${{ needs.ci.outputs.short_commit_sha }}\"/" charts/backstage-node-app/values.yaml
 
       - name: Install ArgoCD CLI
         run: |
-          # Create temp directory and download ArgoCD CLI
-          mkdir -p /tmp/argocd
-          cd /tmp/argocd
+          curl -L -o argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+          chmod +x argocd
+          sudo mv argocd /usr/local/bin/
           
-          # Download with retry and better error handling
-          for i in {1..3}; do
-            if curl -L -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64; then
-              break
-            else
-              echo "Download attempt $i failed, retrying..."
-              sleep 2
-            fi
-          done
-          
-          # Verify download and install
-          if [ -f argocd-linux-amd64 ]; then
-            chmod +x argocd-linux-amd64
-            sudo mv argocd-linux-amd64 /usr/local/bin/argocd
-            echo "ArgoCD CLI installed successfully"
-            argocd version --client
-          else
-            echo "Failed to download ArgoCD CLI after 3 attempts"
-            exit 1
-          fi
-          
-      - name: ArgoCD Login and Sync
+      - name: Deploy to ArgoCD
         run: |
-          # Wait for ArgoCD to be ready
-          echo "Waiting for ArgoCD to be ready..."
-          sleep 10
-          
-          # Login to ArgoCD with retry
-          for i in {1..3}; do
-            if argocd login argocd.example.com \
-              --username admin \
-              --password ${{ secrets.ARGOCD_PASSWORD }} \
-              --insecure; then
-              echo "ArgoCD login successful"
-              break
-            else
-              echo "ArgoCD login attempt $i failed, retrying..."
-              sleep 5
-            fi
-          done
-          
-          # Sync the application
-          echo "Syncing ArgoCD application..."
-          argocd app sync backstage-node-app --force
-          
-          # Wait for sync to complete
-          argocd app wait backstage-node-app --health --timeout 300
+          argocd login argocd.example.com --username admin --password ${{ secrets.ARGOCD_PASSWORD }} --insecure
+          argocd app sync backstage-node-app
             
 

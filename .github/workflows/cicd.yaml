@@ -1,4 +1,4 @@
-name: CI
+name: CICD
 
 on:
   push:
@@ -29,7 +29,7 @@ jobs:
       - name: Run test coverage
         run: npm run test:coverage
 
-  docker:
+  ci:
     runs-on: ubuntu-latest
     needs: test
     steps:
@@ -49,3 +49,29 @@ jobs:
           context: .
           file: Dockerfile
           tags: ${{ secrets.DOCKER_USERNAME }}/node-app:${{ env.SHORT_SHA }}
+    outputs:
+      short_commit_sha: ${{ env.SHORT_SHA }}
+    
+  cd: 
+    runs-on: self-hosted
+    needs: ci
+    steps:
+      - name: Modify version argo values.yaml
+        shell: bash
+        run: |
+          sed -i "s/tag: \".*\"/tag: \"${{ needs.ci.outputs.short_commit_sha }}\"/" charts/backstage-node-app/values.yaml
+
+      - name: Install ArgoCD CLI
+        run: |
+          curl -ksSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+          chmod +x /usr/local/bin/argocd
+          
+      - name: ArgoCD Login
+        run: |
+          argocd login localhost:8080 \
+            --username admin \
+            --password ${{ secrets.ARGOCD_PASSWORD }} \
+            --insecure
+          argocd app sync backstage-node-app
+            
+

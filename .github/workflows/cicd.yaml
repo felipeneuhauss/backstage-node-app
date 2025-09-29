@@ -56,10 +56,15 @@ jobs:
     runs-on: self-hosted
     needs: ci
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
       - name: Modify version argo values.yaml
         shell: bash
         run: |
-          sed -i "s/tag: \".*\"/tag: \"${{ needs.ci.outputs.short_commit_sha }}\"/" charts/backstage-node-app/values.yaml
+          # Use a more robust approach that works on both Linux and macOS
+          sed -i.bak "s/tag: \".*\"/tag: \"${{ needs.ci.outputs.short_commit_sha }}\"/" charts/backstage-node-app/values.yaml
+          rm -f charts/backstage-node-app/values.yaml.bak
 
       - name: Install ArgoCD CLI
         run: |

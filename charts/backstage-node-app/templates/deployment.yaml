@@ -5,9 +5,7 @@ metadata:
   labels:
     {{- include "backstage-node-app.labels" . | nindent 4 }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
-  {{- end }}
   selector:
     matchLabels:
       {{- include "backstage-node-app.selectorLabels" . | nindent 6 }}

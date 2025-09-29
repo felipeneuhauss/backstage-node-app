@@ -101,7 +101,7 @@ jobs:
           
           # Login to ArgoCD with retry
           for i in {1..3}; do
-            if argocd login localhost:8080 \
+            if argocd login argocd.example.com \
               --username admin \
               --password ${{ secrets.ARGOCD_PASSWORD }} \
               --insecure; then

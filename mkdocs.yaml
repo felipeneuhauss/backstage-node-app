@@ -1,15 +1,11 @@
-site_name: 'Backstage Node App'
-site_description: 'Main documentation for Backstage Node App'
+site_name: Backstage Node App
+site_description: Main documentation for Backstage Node App
 repo_url: https://github.com/felipeneuhauss/backstage-node-app
 edit_uri: edit/main/docs
 
 plugins:
   - techdocs-core
-  - redirects:
-      redirect_maps:
-        'index.md': 'docs/index.md'
 
-# For sidebar navigation on https://backstage.io/, see `microsite/sidebars.js`
 nav:
   - Overview:
-      - Getting started: 'docs/index.md'
+      - Getting started: docs/index.md

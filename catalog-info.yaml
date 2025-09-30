@@ -5,7 +5,7 @@ metadata:
   description: An example of a Backstage Node.js application.
   annotations:
     github.com/project-slug: felipeneuhauss/backstage-node-app
-    backstage.io/techdocs-ref: dir:.
+    backstage.io/techdocs-ref: dir:./
 spec:
   type: service
   owner: development
